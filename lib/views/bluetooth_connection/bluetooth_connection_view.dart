@@ -3,19 +3,23 @@ import 'package:bluetooth_classic/bluetooth_classic.dart';
 import 'package:bluetooth_classic/models/device.dart';
 
 class BluetoothConnectionView extends StatefulWidget {
-  const BluetoothConnectionView({Key? key}) : super(key: key);
+  const BluetoothConnectionView({super.key});
 
   @override
-  _BluetoothConnectionViewState createState() => _BluetoothConnectionViewState();
+  State<BluetoothConnectionView> createState() =>
+      _BluetoothConnectionViewState();
 }
 
 class _BluetoothConnectionViewState extends State<BluetoothConnectionView> {
   final BluetoothClassic _bluetooth = BluetoothClassic();
+  String _receivedData = '';
+  TextEditingController sendDataController = TextEditingController();
+
   List<Device> _pairedDevices = [];
   List<Device> _discoveredDevices = [];
+
   bool _scanning = false;
   bool _connected = false;
-  String _receivedData = '';
 
   @override
   void initState() {
@@ -58,7 +62,10 @@ class _BluetoothConnectionViewState extends State<BluetoothConnectionView> {
   }
 
   Future<void> _connectToDevice(Device device) async {
-    await _bluetooth.connect(device.address, "00001101-0000-1000-8000-00805f9b34fb");
+    await _bluetooth.connect(
+      device.address,
+      "",
+    );
 
     _bluetooth.onDeviceDataReceived().listen((data) {
       setState(() {
@@ -79,25 +86,36 @@ class _BluetoothConnectionViewState extends State<BluetoothConnectionView> {
   }
 
   Future<void> _sendData(String data) async {
-    await _bluetooth.write(data);
+    if (_connected) {
+      await _bluetooth.write(data);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Não há conxexão"),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Conexão Bluetooth"),
+        title: const Text("Conexão Bluetooth"),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
+            const Text(
               "Dispositivos Pareados:",
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Column(
               children: _pairedDevices.map((device) {
                 return ListTile(
@@ -106,19 +124,22 @@ class _BluetoothConnectionViewState extends State<BluetoothConnectionView> {
                 );
               }).toList(),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: _getPairedDevices,
-              icon: Icon(Icons.refresh),
-              label: Text("Atualizar Dispositivos Pareados"),
+              icon: const Icon(Icons.refresh),
+              label: const Text("Atualizar Dispositivos Pareados"),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               "Dispositivos Encontrados:",
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            SizedBox(height: 10),
-            _scanning ? Text("Escaneando...") : SizedBox(),
+            const SizedBox(height: 10),
+            _scanning ? const Text("Escaneando...") : const SizedBox(),
             Column(
               children: _discoveredDevices.map((device) {
                 return ListTile(
@@ -128,7 +149,7 @@ class _BluetoothConnectionViewState extends State<BluetoothConnectionView> {
                 );
               }).toList(),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 if (_scanning) {
@@ -137,30 +158,48 @@ class _BluetoothConnectionViewState extends State<BluetoothConnectionView> {
                   _startScan();
                 }
               },
-              child: Text(_scanning ? "Parar Escaneamento" : "Iniciar Escaneamento"),
+              child: Text(
+                  _scanning ? "Parar Escaneamento" : "Iniciar Escaneamento"),
             ),
-
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               "Status da Conexão:",
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(_connected ? "Conectado" : "Desconectado"),
             ElevatedButton(
               onPressed: _connected ? _disconnect : null,
-              child: Text("Desconectar"),
+              child: const Text("Desconectar"),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               "Dados Recebidos:",
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(_receivedData),
-            ElevatedButton(
-              onPressed: () => _sendData("ping"),
-              child: Text("Enviar Dados"),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: sendDataController,
+              decoration: InputDecoration(
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    _sendData(sendDataController.text);
+                  },
+                  icon: const Icon(Icons.send),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                labelText: "Enviar dados",
+              ),
             ),
           ],
         ),

@@ -1,5 +1,5 @@
 import 'package:dcm/views/bluetooth_connection/bluetooth_connection_view.dart';
-import 'package:dcm/views/errors/errors_view.dart';
+import 'package:dcm/views/errors/error_view.dart';
 import 'package:dcm/views/indicators/indicators_view.dart';
 import 'package:dcm/views/settings/settings_view.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +47,7 @@ class _MenuNavigatorState extends State<MenuNavigator> {
       body: const [
         BluetoothConnectionView(),
         IndicatorsView(),
-        ErrorsView(),
+        ErrorView(),
         SettingsView(),
       ] [currentPageIndex],
     );

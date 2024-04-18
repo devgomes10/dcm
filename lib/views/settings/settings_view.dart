@@ -14,6 +14,6 @@ class _SettingsViewState extends State<SettingsView> {
       appBar: AppBar(
         title: const Text("AJUSTES"),
       ),
-    );;
+    );
   }
 }

@@ -14,6 +14,6 @@ class _IndicatorsViewState extends State<IndicatorsView> {
       appBar: AppBar(
         title: const Text("PAINEL"),
       ),
-    );;
+    );
   }
 }
