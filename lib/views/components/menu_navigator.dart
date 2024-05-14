@@ -44,8 +44,8 @@ class _MenuNavigatorState extends State<MenuNavigator> {
           });
         },
       ),
-      body: const [
-        BluetoothConnectionView(),
+      body: [
+        BluetoothClassicScreen(),
         IndicatorsView(),
         ErrorView(),
         SettingsView(),
