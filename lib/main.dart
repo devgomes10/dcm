@@ -1,4 +1,5 @@
-import 'package:dcm/views/components/menu_navigator.dart';
+import 'package:dcm/views/bluetooth_connection/connection_view.dart';
+import 'package:dcm/views/indicators/indicators_view.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -11,12 +12,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MenuNavigator(),
+      title: 'Bluetooth App',
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const BluetoothScreen(),
+        '/dataTransferPage': (context) => const IndicatorsView(),
+      },
     );
   }
 }

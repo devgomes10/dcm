@@ -10,10 +10,6 @@ class IndicatorsView extends StatefulWidget {
 class _IndicatorsViewState extends State<IndicatorsView> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("PAINEL"),
-      ),
-    );
+    return const Placeholder();
   }
 }
