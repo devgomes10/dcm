@@ -1,36 +1,18 @@
 import 'dart:convert';
-import 'package:dcm/views/components/menu_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:async';
 
-void main() => runApp(const MyApp());
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'ELM327 OBD2 Bluetooth',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MenuNavigator(),
-    );
-  }
-}
-
-class BluetoothPage extends StatefulWidget {
-  const BluetoothPage({super.key});
+class Settings extends StatefulWidget {
+  const Settings({super.key});
 
   @override
-  State<BluetoothPage> createState() => _BluetoothPageState();
+  State<Settings> createState() => _SettingsState();
 }
 
-class _BluetoothPageState extends State<BluetoothPage> {
+class _SettingsState extends State<Settings> {
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
   List<BluetoothDevice> _devicesList = [];
   BluetoothDevice? _selectedDevice;
@@ -39,6 +21,19 @@ class _BluetoothPageState extends State<BluetoothPage> {
   bool _isConnected = false;
   final _commandController = TextEditingController();
   String _output = '';
+
+  List<String> _commands = [
+    'AT SP A',
+    'AT CAF 0',
+    'AT AL',
+    'AT CRA 0CF00400',
+    '18FEF100',
+    '18FEF200',
+    '18FEF300',
+  ];
+
+  int _currentCommandIndex = 0;
+  Timer? _commandTimer;
 
   @override
   void initState() {
@@ -116,7 +111,7 @@ class _BluetoothPageState extends State<BluetoothPage> {
 
     try {
       _connection =
-          await BluetoothConnection.toAddress(_selectedDevice!.address);
+      await BluetoothConnection.toAddress(_selectedDevice!.address);
       setState(() {
         _isConnected = true;
         _isConnecting = false;
@@ -129,6 +124,9 @@ class _BluetoothPageState extends State<BluetoothPage> {
           _isConnected = false;
         });
       });
+
+      _sendNextCommand();
+
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -141,16 +139,33 @@ class _BluetoothPageState extends State<BluetoothPage> {
     }
   }
 
-  void _onDataReceived(Uint8List data) {
-    setState(() {
-      _output += '${utf8.decode(data)}\n';
-    });
+  void _sendNextCommand() async {
+    if (_currentCommandIndex < _commands.length) {
+      String command = _commands[_currentCommandIndex];
+      _sendCommand(command);
+      _currentCommandIndex++;
+      _commandTimer = Timer(Duration(milliseconds: 500), _sendNextCommand);
+    } else {
+      _currentCommandIndex = 0; // Reset index to send commands again
+    }
   }
 
   void _sendCommand(String command) async {
     if (_connection != null && _connection!.isConnected) {
       _connection!.output.add(Uint8List.fromList(utf8.encode("$command\r\n")));
       await _connection!.output.allSent;
+    }
+  }
+
+  void _onDataReceived(Uint8List data) {
+    String dataString = utf8.decode(data);
+    setState(() {
+      _output += '$dataString\n';
+    });
+
+    if (_commandTimer != null && _commandTimer!.isActive) {
+      _commandTimer!.cancel(); // Cancel the timer if we received data
+      _sendNextCommand(); // Send the next command immediately
     }
   }
 
@@ -180,10 +195,10 @@ class _BluetoothPageState extends State<BluetoothPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scanner MWM'),
+        title: const Text("Ajustes"),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Row(

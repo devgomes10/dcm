@@ -2,7 +2,7 @@ name: dcm
 description: "An engine diagnostics and fixes app"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+7
+version: 1.0.0+9
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -13,7 +13,8 @@ dependencies:
 
   cupertino_icons: ^1.0.6
   flutter_bluetooth_serial: ^0.4.0
-
+  permission_handler: ^10.2.0
+  excel: ^4.0.3
 
 dev_dependencies:
   flutter_test:
